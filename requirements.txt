@@ -3,3 +3,4 @@ shillelagh[all]
 pypng
 pyqrcode
 Pillow
+openpyxl
