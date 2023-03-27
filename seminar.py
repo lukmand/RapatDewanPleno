@@ -2,8 +2,8 @@ import streamlit as st
 import pandas as pd
 from shillelagh.backends.apsw.db import connect
 import pyqrcode
-from twilio.rest import Client
 import png
+from PIL import Image
 
 connection = connect(":memory:")
 cursor = connection.cursor()
@@ -11,19 +11,6 @@ title = 'Gereja Santa Maria Imakulata'
 excel = pd.read_excel("DataLingkungan-20230324.xlsx")
 
 st.set_page_config(page_title=title, layout="centered")
-
-def send_message(user_phone, title, img_title):
-    
-    account_sid = st.secrets["account_sid"]
-    auth_token = st.secrets["auth_token"]
-    client = Client(account_sid, auth_token)
-    
-    message = client.messages.create(
-      from_='whatsapp:{wa_number}'.format(wa_number = st.secrets["wa_number"]),
-      body='This is an automated message for {title}'.format(title = title),
-      media_url= "img/{img_title}.png".format(img_title = img_title),
-      to='whatsapp:{user_phone}'.format(user_phone = user_phone)
-    )
 
 def read_wilayah():
 
@@ -66,6 +53,11 @@ if submit:
         user_phone = user_phone.replace('0', '+62', 1)
     img_title = str(kode_lingkungan) + "_" + user_name
     qr_code = pyqrcode.create(img_title)
-    qr_code = qr_code.png("img/{img_title}.png".format(img_title = img_title))
+    loc = "img/{img_title}.png".format(img_title = img_title)
+    qr_code = qr_code.png(loc, scale = 6)
 
-    send_message(user_phone, title, img_title)
+    c6, c7, c8 = st.columns(3)
+    image = Image.open(loc)
+    c7.write("Mohon Download atau Screenshot QR Code dibawah")
+    c7.image(image)
+    c7.download_button("Download QR", data=open(loc, 'rb').read(), file_name=img_title+".png", mime='image/png')

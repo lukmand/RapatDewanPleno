@@ -2,4 +2,4 @@ pandas
 shillelagh[all]
 pypng
 pyqrcode
-twilio
+Pillow
