@@ -12,6 +12,9 @@ excel = pd.read_excel("DataLingkungan-20230324.xlsx")
 
 st.set_page_config(page_title=title, layout="centered")
 
+def format_func(option):
+    return lingkungan_dict[option]
+
 def read_wilayah():
 
     query = "select distinct kode_wilayah from excel"
@@ -22,26 +25,23 @@ def read_wilayah():
     
 def read_lingkungan(kode_wilayah):
 
-    query = "select distinct kode_lingkungan from excel where kode_wilayah = {kode_wilayah}".format(kode_wilayah = kode_wilayah)
+    query = "select distinct kode_lingkungan, nama_lingkungan from excel where kode_wilayah = {kode_wilayah}".format(kode_wilayah = kode_wilayah)
     query_res = cursor.execute(query).fetchall()
     df  = pd.DataFrame.from_records(query_res, columns = [column[0] for column in cursor.description])
 
     return df
     
-def read_nama(kode_wilayah, kode_lingkungan):
-
-    query = "select distinct nama_lingkungan from excel where kode_wilayah = {kode_wilayah} and kode_lingkungan = {kode_lingkungan}".format(kode_wilayah = kode_wilayah, kode_lingkungan = kode_lingkungan)
-    query_res = cursor.execute(query).fetchall()
-    df  = pd.DataFrame.from_records(query_res, columns = [column[0] for column in cursor.description])
-
-    return df
     
 st.write("# Rapat Dewan Pleno")    
 
-c1, c2, c3 = st.columns(3)
+c1, c2 = st.columns(2)
+lingkungan_dict = {}
 kode_wilayah = c1.selectbox("Kode Wilayah", read_wilayah())
-kode_lingkungan = c2.selectbox("Kode Lingkungan", read_lingkungan(kode_wilayah))
-nama_lingkungan = c3.text_input("Nama Lingkungan", value=read_nama(kode_wilayah, kode_lingkungan).iat[0, 0], disabled=True)
+lingkungan_df = read_lingkungan(kode_wilayah)
+for i in lingkungan_df.values.tolist():
+    lingkungan_dict[i[0]] = i[1]
+    
+nama_lingkungan = c2.selectbox("Nama Lingkungan", options = list(lingkungan_dict.keys()), format_func = format_func)
     
 c4, c5 = st.columns(2)
 user_name = c4.text_input("Nama")
@@ -51,7 +51,7 @@ submit = st.button("Kirim")
 if submit:
     if user_phone[0] == "0":
         user_phone = user_phone.replace('0', '+62', 1)
-    img_title = str(kode_lingkungan) + "_" + user_name
+    img_title = str(format_func(nama_lingkungan)) + "_" + user_name
     qr_code = pyqrcode.create(img_title)
     loc = "img/{img_title}.png".format(img_title = img_title)
     qr_code = qr_code.png(loc, scale = 6)
