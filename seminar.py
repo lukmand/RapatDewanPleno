@@ -58,7 +58,7 @@ if submit:
     
     c6, c7, c8 = st.columns(3)
     
-    c7.write(img_title)
+    #c7.write(img_title)
     image = Image.open(loc)
     c7.write("Mohon Download atau Screenshot QR Code dibawah")
     c7.image(image)
