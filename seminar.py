@@ -25,10 +25,10 @@ def read_wilayah():
     
 def read_lingkungan(kode_wilayah):
 
-    query = "select distinct kode_lingkungan, nama_lingkungan from excel where kode_wilayah = {kode_wilayah}".format(kode_wilayah = kode_wilayah)
+    query = "select distinct case when length(kode_lingkungan) = 3 then '0' || kode_lingkungan else kode_lingkungan end kode_lingkungan, nama_lingkungan from excel where kode_wilayah = {kode_wilayah}".format(kode_wilayah = kode_wilayah)
     query_res = cursor.execute(query).fetchall()
     df  = pd.DataFrame.from_records(query_res, columns = [column[0] for column in cursor.description])
-
+    print(df)
     return df
     
     
@@ -41,7 +41,7 @@ lingkungan_df = read_lingkungan(kode_wilayah)
 for i in lingkungan_df.values.tolist():
     lingkungan_dict[i[0]] = i[1]
     
-nama_lingkungan = c2.selectbox("Nama Lingkungan", options = list(lingkungan_dict.keys()), format_func = format_func)
+kode_lingkungan = c2.selectbox("Nama Lingkungan", options = list(lingkungan_dict.keys()), format_func = format_func)
     
 c4, c5 = st.columns(2)
 user_name = c4.text_input("Nama")
@@ -51,12 +51,14 @@ submit = st.button("Kirim")
 if submit:
     if user_phone[0] == "0":
         user_phone = user_phone.replace('0', '+62', 1)
-    img_title = str(format_func(nama_lingkungan)) + "_" + user_name
+    img_title = str(kode_lingkungan) + "_" + user_name
     qr_code = pyqrcode.create(img_title)
     loc = "img/{img_title}.png".format(img_title = img_title)
     qr_code = qr_code.png(loc, scale = 6)
-
+    
     c6, c7, c8 = st.columns(3)
+    
+    c7.write(img_title)
     image = Image.open(loc)
     c7.write("Mohon Download atau Screenshot QR Code dibawah")
     c7.image(image)
