@@ -28,7 +28,7 @@ def read_lingkungan(kode_wilayah):
     query = "select distinct case when length(kode_lingkungan) = 3 then '0' || kode_lingkungan else kode_lingkungan end kode_lingkungan, nama_lingkungan from excel where kode_wilayah = {kode_wilayah}".format(kode_wilayah = kode_wilayah)
     query_res = cursor.execute(query).fetchall()
     df  = pd.DataFrame.from_records(query_res, columns = [column[0] for column in cursor.description])
-    print(df)
+    #print(df)
     return df
     
     
@@ -51,14 +51,14 @@ submit = st.button("Kirim")
 if submit:
     if user_phone[0] == "0":
         user_phone = user_phone.replace('0', '+62', 1)
-    img_title = str(kode_lingkungan) + "_" + user_name
+    img_title = str(kode_lingkungan) + "_" + user_name + "_" + user_phone
     qr_code = pyqrcode.create(img_title)
     loc = "img/{img_title}.png".format(img_title = img_title)
     qr_code = qr_code.png(loc, scale = 6)
     
     c6, c7, c8 = st.columns(3)
     
-    #c7.write(img_title)
+    c7.write(img_title)
     image = Image.open(loc)
     c7.write("Mohon Download atau Screenshot QR Code dibawah")
     c7.image(image)
